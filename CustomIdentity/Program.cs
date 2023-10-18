@@ -25,6 +25,7 @@ builder.Services.AddRazorPages();
 
 // Register Custom Services Here
 builder.Services.AddScoped<IMailKitEmailSender, MailKitEmailService>();
+builder.Services.AddScoped<IImageService,BasicImageService>();
 
 var app = builder.Build();
 

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using CustomIdentity.Models;
+using CustomIdentity.Services.Interfaces;
 
 namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
 {
@@ -17,13 +18,16 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<CustomUser> _userManager;
         private readonly SignInManager<CustomUser> _signInManager;
+        private readonly IImageService _imageService;
 
         public IndexModel(
             UserManager<CustomUser> userManager,
-            SignInManager<CustomUser> signInManager)
+            SignInManager<CustomUser> signInManager,
+            IImageService imageService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _imageService = imageService;
         }
 
         /// <summary>
@@ -31,6 +35,8 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
         public string Username { get; set; }
+
+        public string CurrentImage { get; set; }
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -62,7 +68,7 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
             [Display(Name = "Profile Picture")]
-            public byte[] ProfilePicture { get; set; }
+            public IFormFile ProfilePictureFile { get; set; }
         }
         private async Task LoadAsync(CustomUser user)
         {
@@ -70,9 +76,9 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             var firstName = user.FirstName;
             var lastName = user.LastName;
-            var profilePicture = user.ProfileImageData;
 
             Username = userName;
+            CurrentImage = _imageService.DecodeImage(user.ProfileImageData, user.ProfileImageType);
 
             Input = new InputModel
             {
@@ -80,7 +86,7 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
                 Username = userName,
                 FirstName = firstName,
                 LastName = lastName,
-                ProfilePicture = profilePicture,
+                //ProfilePicture = profilePicture,
             };
         }
 
@@ -133,6 +139,14 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
                     StatusMessage = "Unexpected error when trying to set phone number.";
                     return RedirectToPage();
                 }
+            }
+
+            // if and only if the user selected a new image will I update their profile
+            if (Input.ProfilePictureFile is not null)
+            {
+                user.ProfileImageData = await _imageService.EncodeImageAsync(Input.ProfilePictureFile);
+                user.ProfileImageType = _imageService.ImageType(Input.ProfilePictureFile);
+                await _userManager.UpdateAsync(user);
             }
 
             await _signInManager.RefreshSignInAsync(user);

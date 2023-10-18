@@ -5,35 +5,53 @@
     ViewData["ActivePage"] = ManageNavPages.Index;
 }
 
-<h3>@ViewData["Title"]</h3>
+@* <h3>@ViewData["Title"]</h3> *@
 <partial name="_StatusMessage" for="StatusMessage" />
-<div class="row">
-    <div class="col-md-6">
-        <form id="profile-form" method="post">
+<form id="profile-form" method="post" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-6">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-floating">
+            <div class="form-floating mb-2">
                 <input asp-for="Username" class="form-control" disabled />
                 <label asp-for="Username" class="form-label"></label>
             </div>
-            <div class="form-floating">
+            <div class="form-floating mb-2">
                 <input asp-for="Input.FirstName" class="form-control" />
                 <label asp-for="Input.FirstName" class="form-label"></label>
                 <span asp-validation-for="Input.FirstName" class="text-danger"></span>
             </div>
-            <div class="form-floating">
+            <div class="form-floating mb-2">
                 <input asp-for="Input.LastName" class="form-control" />
                 <label asp-for="Input.LastName" class="form-label"></label>
                 <span asp-validation-for="Input.LastName" class="text-danger"></span>
             </div>
-            <div class="form-floating">
+            <div class="form-floating mb-2">
                 <input asp-for="Input.PhoneNumber" class="form-control" />
                 <label asp-for="Input.PhoneNumber" class="form-label"></label>
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
             </div>
-            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
-        </form>
+            @* <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button> *@
+        </div>
+        <div class="col-md-6">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-floating">
+                <img src="@Model.CurrentImage" class="image-fluid rounded-circle mb-1" style="width:250px;height:250px; object-fit:cover" />
+                @* <label asp-for="Input.ProfilePictureFile" style="width: 100%;"></label> *@
+                <input type="file"
+                    accept=".png,.jpg,.jpeg,.gif,.tif"
+                    asp-for="Input.ProfilePictureFile"
+                       class="w-100 btn btn-sm" />
+@*                     class="form-control" style="border:0px!important;padding: 0px;padding-top: 10px;padding-bottom: 30px;"/> *@
+            </div>
+            <span asp-validation-for="Input.ProfilePictureFile" class="text-danger"></span>
+        </div>
     </div>
-</div>
+    <div class="row">
+        <div class="col">
+            <button id="update-profile-button" type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+        </div>
+    </div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
