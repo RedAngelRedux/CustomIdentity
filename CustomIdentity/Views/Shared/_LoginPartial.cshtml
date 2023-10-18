@@ -1,12 +1,28 @@
 ﻿@using Microsoft.AspNetCore.Identity
+@using CustomIdentity.Services.Interfaces
 @inject SignInManager<CustomUser> SignInManager
 @inject UserManager<CustomUser> UserManager
+@inject IImageService ImageService
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
+    var imageData = UserManager.GetUserAsync(User).Result.ProfileImageData;
+    if(imageData is not null)
+    {
+        var imageType = UserManager.GetUserAsync(User).Result.ProfileImageType;
+
+        <li class="nav-item" style="align-self: center;">
+            @if (UserManager.GetUserAsync(User).Result.ProfileImageData != null)
+            {
+                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">
+                <img style="width:40px;height:40px; object-fit:cover; border-radius:30px"
+                    srcset="@ImageService.DecodeImage(imageData,imageType)" /></a>
+            }
+        </li>
+    }
     <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
+        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
     </li>
     <li class="nav-item">
         <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
