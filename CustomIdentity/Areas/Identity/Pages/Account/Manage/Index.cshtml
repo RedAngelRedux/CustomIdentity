@@ -7,13 +7,15 @@
 
 @* <h3>@ViewData["Title"]</h3> *@
 <partial name="_StatusMessage" for="StatusMessage" />
+<partial name="_StatusMessage" for="UserNameChangeLimitMessage" /> 
 <form id="profile-form" method="post" enctype="multipart/form-data">
     <div class="row">
         <div class="col-md-6">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-floating mb-2">
-                <input asp-for="Username" class="form-control" disabled />
-                <label asp-for="Username" class="form-label"></label>
+                <!-- TO DO:  Add logic to disable this Input if UsernameChangeLimit has been reached. -->
+                <input asp-for="Input.Username" class="form-control" />
+                <label asp-for="Input.Username" class="form-label"></label>
             </div>
             <div class="form-floating mb-2">
                 <input asp-for="Input.FirstName" class="form-control" />

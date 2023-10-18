@@ -45,6 +45,9 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
         [TempData]
         public string StatusMessage { get; set; }
 
+        [TempData]
+        public string UserNameChangeLimitMessage { get; set; }
+
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
@@ -64,6 +67,7 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
             public string LastName { get; set; }
             [Display(Name = "Username")]
             public string Username { get; set; }
+            public int UsernameChangeLimit { get; set; }
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
@@ -76,6 +80,7 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             var firstName = user.FirstName;
             var lastName = user.LastName;
+            var userNameChangeLimit = user.UsernameChangeLimit;
 
             Username = userName;
             CurrentImage = _imageService.DecodeImage(user.ProfileImageData, user.ProfileImageType);
@@ -86,7 +91,7 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
                 Username = userName,
                 FirstName = firstName,
                 LastName = lastName,
-                //ProfilePicture = profilePicture,
+                UsernameChangeLimit = userNameChangeLimit
             };
         }
 
@@ -98,6 +103,7 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
+            UserNameChangeLimitMessage = $"You can change your username {user.UsernameChangeLimit} more time(s).";
             await LoadAsync(user);
             return Page();
         }
@@ -108,6 +114,30 @@ namespace CustomIdentity.Areas.Identity.Pages.Account.Manage
             if (user == null)
             {
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            if (user.UsernameChangeLimit > 0)
+            {
+                if (Input.Username != user.UserName)
+                {
+                    var userNameExists = await _userManager.FindByNameAsync(Input.Username);
+                    if (userNameExists != null)
+                    {
+                        StatusMessage = "User name already taken.  Select a differnt username";
+                        return RedirectToPage();
+                    }
+                    var setUserName = await _userManager.SetUserNameAsync(user, Input.Username);
+                    if(!setUserName.Succeeded)
+                    {
+                        StatusMessage = "Unexpected error when trying to set user name.";
+                        return RedirectToPage();
+                    }
+                    else
+                    {
+                        user.UsernameChangeLimit -= 1;
+                        await _userManager.UpdateAsync(user);
+                    }
+                }
             }
 
             var firstName = user.FirstName;
