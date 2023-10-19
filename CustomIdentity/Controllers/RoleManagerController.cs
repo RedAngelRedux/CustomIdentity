@@ -1,4 +1,5 @@
 ﻿using CustomIdentity.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +15,7 @@ namespace CustomIdentity.Controllers
             _roleManager = roleManager;
         }
 
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> Index()
         {
             var roles = await _roleManager.Roles.ToListAsync();
@@ -21,6 +23,7 @@ namespace CustomIdentity.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> AddRole(string roleName)
         {
             if(roleName is not null) 
