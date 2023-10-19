@@ -18,7 +18,7 @@ namespace CustomIdentity.Models
         [Display(Name = "Last Name")]
         public string LastName { get; set; }
 
-        public int UsernameChangeLimit { get; set; }
+        public int UsernameChangeLimit { get; set; } = 10;
 
         [Display(Name ="Profile Picture")]
         public byte[]? ProfileImageData { get; set; }
