@@ -4,9 +4,11 @@ namespace CustomIdentity.Services
 {
     public class BasicImageService : IImageService
     {
-        public string? ImageType(IFormFile file)
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public BasicImageService(IHttpClientFactory httpClientFactory)
         {
-            return file?.ContentType;
+            _httpClientFactory = httpClientFactory;
         }
 
         public string? DecodeImage(byte[] data, string type)
@@ -31,9 +33,24 @@ namespace CustomIdentity.Services
             return await File.ReadAllBytesAsync(file);
         }
 
-        public int Size(IFormFile file)
+        public async Task<byte[]?> EncodeImageUrlAsyc(string imageUrl)
+        {
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync(imageUrl);
+            using Stream stream = await response.Content.ReadAsStreamAsync();
+            var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            return ms.ToArray();
+        }
+
+        public int FileSize(IFormFile file)
         {
             return Convert.ToInt32(file?.Length);
+        }
+
+        public string? ImageType(IFormFile file)
+        {
+            return file?.ContentType;
         }
     }
 }
